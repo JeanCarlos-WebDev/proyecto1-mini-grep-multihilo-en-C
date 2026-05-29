@@ -1,0 +1,7 @@
+Un pipe es un canal unidireccional de comunicación.
+El extremo de escritura envía datos al extremo de lectura.
+Los pipes permiten comunicar procesos padre e hijo.
+pipe() retorna dos descriptores de archivo.
+write() escribe bytes en el extremo de escritura.
+read() bloquea hasta que haya datos disponibles.
+Cerrar el extremo de escritura genera un EOF en el lector.

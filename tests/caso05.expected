@@ -1,0 +1,6 @@
+COINCIDENCIAS_COUNT=9
+TOTAL_LINE=Total de coincidencias: 9
+HILO_0_ARCHIVO=tests/datos/sistemas.txt
+HILO_1_ARCHIVO=tests/datos/hilos.txt
+HILO_2_ARCHIVO=tests/datos/pipes.txt
+HILO_3_ARCHIVO=tests/datos/memoria.txt

@@ -1,0 +1,7 @@
+El kernel gestiona los recursos del sistema.
+Un proceso puede crear hilos con pthreads.
+La memoria virtual permite aislar procesos.
+El scheduler decide qué proceso corre en la CPU.
+Los pipes son canales de comunicación entre procesos.
+Un mutex evita que dos hilos accedan a datos compartidos.
+El sistema operativo abstrae el hardware.

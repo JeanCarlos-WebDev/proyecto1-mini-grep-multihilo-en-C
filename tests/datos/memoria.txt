@@ -1,0 +1,5 @@
+El sistema operativo administra la memoria principal.
+La paginación divide la memoria en marcos de página.
+El swapping mueve procesos entre memoria y disco.
+La memoria compartida permite comunicación eficiente.
+Un proceso tiene su propio espacio de direcciones virtuales.

@@ -1,0 +1,4 @@
+COINCIDENCIAS_COUNT=2
+TOTAL_LINE=Total de coincidencias: 2
+HILO_0_ARCHIVO=tests/datos/sistemas.txt
+HILO_1_ARCHIVO=tests/datos/hilos.txt

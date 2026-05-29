@@ -1,0 +1,6 @@
+Un hilo es una unidad de ejecución dentro de un proceso.
+Todos los hilos de un proceso comparten el mismo espacio de memoria.
+pthread_create lanza un nuevo hilo de ejecución.
+pthread_join espera a que un hilo termine.
+Un mutex protege secciones críticas del código.
+El interbloqueo ocurre cuando dos hilos esperan recursos mutuamente.
