@@ -36,6 +36,10 @@ void grep_init(Resultado *res, int fd) {
      *   Opción 2 (función, más explícita):
      *     pthread_mutex_init(&res->mutex, NULL);
      */
+
+    res->total_coincidencias = 0;
+    res->pipe_escritura = fd;
+    pthread_mutex_init(&res->mutex, NULL);
 }
 
 /* ================================================================== */
@@ -43,6 +47,32 @@ void grep_init(Resultado *res, int fd) {
 /*  Función ejecutada por cada hilo.                                   */
 /* ================================================================== */
 void *grep_buscar(void *arg) {
+    ArgsHilo *args = (ArgsHilo *)arg;
+        FILE *f = fopen(args->ruta, "r");
+        if (f == NULL) {
+        fprintf(stderr, "[Hilo %d] Error: no se pudo abrir %s\n",
+                args->id_hilo, args->ruta);
+        return NULL;
+    }
+    char linea[MAX_LINEA];
+        while (fgets(linea, sizeof(linea), f)) {
+        if (strstr(linea, args->palabra) != NULL) {
+            linea[strcspn(linea, "\n")] = '\0';
+            pthread_mutex_lock(&args->res->mutex);
+            args->res->total_coincidencias++;
+            char msg[MAX_RUTA + MAX_LINEA + 64];
+            int  n = snprintf(msg, sizeof(msg),
+                        "[Hilo %d] %s: %s\n",
+                        args->id_hilo,
+                        args->ruta,
+                        linea);
+            write(args->res->pipe_escritura, msg, n);
+            pthread_mutex_unlock(&args->res->mutex);
+        }
+    }
+
+    fclose(f);
+    return NULL;
     /*
      * TODO-B  (~25 líneas)
      * ---------------------
@@ -87,13 +117,13 @@ void *grep_buscar(void *arg) {
      *   fclose(f);
      *   return NULL;
      */
-    return NULL; /* ← quitar cuando implementes */
 }
 
 /* ================================================================== */
 /*  grep_destruir                                                       */
 /* ================================================================== */
 void grep_destruir(Resultado *res) {
+    pthread_mutex_destroy(&res->mutex);
     /*
      * TODO-C  (~1 línea)
      * ------------------

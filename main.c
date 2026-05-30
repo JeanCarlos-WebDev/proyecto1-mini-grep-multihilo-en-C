@@ -46,7 +46,12 @@ static void ejecutar_monitor(int fd_lectura) {
      *
      * ~5 líneas de código.
      */
-
+    char buf[MAX_RUTA + MAX_LINEA + 64];
+    ssize_t n;
+    while ((n = read(fd_lectura, buf, sizeof(buf))) > 0){
+        write(STDOUT_FILENO, buf, n);
+    }
+    close(fd_lectura);  
 }
 
 /* ================================================================== */
@@ -71,8 +76,17 @@ int main(int argc, char *argv[]) {
      * ~8 líneas de código.
      */
 
-    const char *palabra = argv[1];
+    if (argc < 3){
+        fprintf(stderr, "Uso: ./grep <palabra> <archivo1> [archivo2 ...]\n");
+        return 1;
+    } 
+    // const char *palabra = argv[1];
     int         n_arch  = argc - 2;
+    if (n_arch > MAX_HILOS){
+        fprintf(stderr, "Error: la cantidad de archivos es mayor al máximo número de hilos\n");
+        return 1;    
+    }
+
 
     /* ── TODO-2: Crear el pipe ───────────────────────────────────────
      *
@@ -86,6 +100,12 @@ int main(int argc, char *argv[]) {
      *
      * ~4 líneas de código.
      */
+
+    int fds[2];
+    if (pipe(fds) == -1){
+        perror("pipe");
+        return 1;
+    }
 
     /* ── TODO-3: fork() — crear el proceso monitor ───────────────────
      *
@@ -104,6 +124,20 @@ int main(int argc, char *argv[]) {
      * ~12 líneas de código.
      */
 
+    pipe(fds);
+
+    pid_t pid = fork();
+    if (pid == -1) {
+        perror("fork");
+        return 1;
+    } else if (pid == 0) {
+        close(fds[1]);
+        ejecutar_monitor(fds[0]);
+        exit(0);
+    } else {
+        close(fds[0]);
+    }
+
     /* ── TODO-4: Inicializar la estructura compartida ────────────────
      *
      * Declara:   Resultado res;
@@ -112,6 +146,10 @@ int main(int argc, char *argv[]) {
      *
      * ~2 líneas de código.
      */
+
+    //TODO-4:
+    Resultado res;
+    grep_init(&res, fds[1]);
 
     /* ── TODO-5: Preparar argumentos y lanzar hilos ──────────────────
      *
@@ -131,6 +169,33 @@ int main(int argc, char *argv[]) {
      * ~10 líneas de código.
      */
 
+    //TODO: 5
+    const char *palabra = argv[1];
+    pthread_t hilos[MAX_HILOS];
+    ArgsHilo  args[MAX_HILOS];
+    for (int i = 0; i < n_arch; i++){
+        args[i].id_hilo = i;
+        strncpy(args[i].ruta,    argv[i+2], MAX_RUTA  - 1);
+        strncpy(args[i].palabra, palabra,   MAX_LINEA - 1);
+        args[i].res = &res;
+        int code = pthread_create(&hilos[i], NULL, grep_buscar, &args[i]);
+            if(code != 0){
+                perror("pthread_create");
+            }
+        };
+      // TODO: 6
+    for (int i = 0; i < n_arch; i++){
+        pthread_join(hilos[i], NULL);
+    }
+
+    //TODO: 7
+    close(fds[1]);
+    wait(NULL);
+
+    //TODO: 8
+    printf("---\nTotal de coincidencias: %d\n", res.total_coincidencias);
+    grep_destruir(&res);
+    return 0;
     /* ── TODO-6: Esperar a todos los hilos ───────────────────────────
      *
      * Para i = 0 .. n_arch-1:
@@ -163,5 +228,5 @@ int main(int argc, char *argv[]) {
      * ~3 líneas de código.
      */
 
-    return 0; /* ← reemplazar cuando implementes TODO-8 */
+    /* ← reemplazar cuando implementes TODO-8 */
 }
